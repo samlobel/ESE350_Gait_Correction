@@ -110,6 +110,10 @@ def breakContinuousDataIntoSteps(data):
 
   # first, construct a parallel array that tells you if you're on or off.
 
+  # the data is an array of arrays, the inner of which are just data points.
+  # we want an array of steps, each step being an array of timeStamps, each
+  # timeStamp being an array of datapoints. So it turns a 2d array into a 3d array.
+
   minTupleLength = 10
   maxTupleLength = 60
   numToLookAhead = 10
@@ -170,7 +174,7 @@ def makeCostMatrix(arr1, arr2, costFunction):
 
 
 def DTWCostWithCostFunction(arr1, arr2, costFunction):
-  makeCostMatrix = makeCostMatrix(arr1,arr2,costFunction)
+  # costMatrix = makeCostMatrix(arr1,arr2,costFunction)
   dtwMatrix = [[100000000 for i in range(len(arr1))] for j in range(len(arr2))]
   dtwMatrix[0][0] = 0
 
@@ -205,9 +209,9 @@ class kNNObject:
     #   dataArray.append(toAppend)
 
     rawArray = [[float(val) for val in line.rstrip().split(',')] for line in f]
-    stepArray = breakContinuousDataIntoSteps(rawArray)
-    categorizedSteps = [(stepType, step) for step in stepArray]
-    self.trainingData.extend(categorizeSteps)
+    arrayOfSteps = breakContinuousDataIntoSteps(rawArray)
+    stepsWithCategories = [(stepType, step) for step in arrayOfSteps]
+    self.trainingData.extend(stepsWithCategories)
     f.close()
 
 
@@ -245,24 +249,33 @@ class kNNObject:
       nameToStepCount[maxType] += 1
     return nameToStepCount
 
-  def categorizeFileOfSteps(self, file, k):
+  def categorizeFileOfSteps(self, fileName, k):
     f = open(fileName, 'r')
-    # stepType = int(f.readLine().rstrip())
-    dataArray = [[float(val) for val in line.rstrip().split(',')] for line in f]
-    # toAppend = []
-    # for line in f:
-    #   toAppend = 
-    #   dataArray.append(toAppend)
-    # self.trainingData.extend(dataArray)
+    # file is already steps. 
+    arrayOfSteps = [[float(val) for val in line.rstrip().split(',')] for line in f]
+    nameToStepCount = self.categorizeSteps(arrayOfSteps)
     f.close()
+    return nameToStepCount
 
-
+  def categorizeRawFile(self, fileName, k):
+    f = open(fileName, 'r')
+    rawArray = [[float(val) for val in line.rstrip().split(',')] for line in f]
+    arrayOfSteps = breakContinuousDataIntoSteps(rawArray)
+    return self.categorizeSteps(arrayOfSteps, k)
 
 
   def prettySimilarityString(self, step, k):
     breakdown = self.findSimilarityBreakdown(step, k)
     return "Supination:   " + str(breakdown[2][1]) + "Normal:   " + str(breakdown[0][1]) +
         "Pronation:   " + str(breakdown[0][1])
+
+
+  
+
+
+
+
+
 
 
 
