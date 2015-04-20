@@ -1,3 +1,5 @@
+#PROJECT ACHILLES
+
 This is a data collection, analysis, and visualization software kit written by Sam Lobel and Yixing Du.
 
 ##Data Collection
@@ -10,20 +12,20 @@ There will be both labeled data, which is used for training, and unlabeled data,
 Data transfer is going to be done over Bluetooth. Our computer will be listening for a file transfer, and when it happens, it will store the file in the data folder. 
 
 
-#####Data Visualization
+##Data Visualization
 Data visualizatoin won't be too complicated. It has two components: insole definition and pressure visualization. Insole definition is where you can define the shape of your insole, that can be fed into the visualization software to define your insole nsor positions. Visualization will take in a shape of the insole, and also read in a file to visualize. It'll then output the pressure sensor readings as red dots, on the lines that define your softPot strips.
 
 
-#####Machine Learning
+##Machine Learning
 This was definitely the most involved part of the programming. This part of the program had to take in a raw data file, compare it to training data, and output a classification of stride. 
 
-######Data Sanitization
+#####Data Sanitization
 We needed to go from previously-described raw data to a form of data that represented all of the steps taken in some reading period. This is the equivalent problem of finding domain walls that separate steps, and throwing out everything in between. Defining the beginning of a step as when 2 out of 5 sensors had non-negligible readings for some amount of time, and the end of a step as when they didn't, this problem was reduced to just iterating through an array of raw data timeStamps. The input of this part was a raw data array (an array of timeStamps, where timeStamps are arrays of sensor values), and the output was an array of steps (an array of steps, where steps are arrays of timeStamps, and timeStamps are arrays of sensor values). 
 
-######Comparing Steps
+#####Comparing Steps
 Once we have our stepArray, we needed a metric for comparing two different steps. A basic machine learning technique for comparing feature lists is treating it as a vector space, and finding some sensible distance metric that tells you sample-closeness. This is what we did to compare timeStamps, but a step is a variable-length sequence of timeStamps, which is a LOT more difficult to deal with. The technique we decided on is called Dynamic Time Warping, which is when you morph the time axis of two samples in order to find the timeStamp lineup that minimizes total comparison costs. It's essentially a dynamic programming problem, where you iterate until you're at the end of each sample, remembering the cost to get to any given comparison point along the way. Using these two metrics in tandem gave us a way to compare steps. Having this metric means that we could then do classification against labeled data.
 
-######Classifying Walking Style
+#####Classifying Walking Style
 We settled on a pretty simple machine-learning algorithm called k-Nearest-Neighbor classification. You train this method by inputting all of your labeled steps. When you want to classify an unlabeled step, you compare it to all of the labelled steps, keeping track of its distance from each. Then, you look at the closest k labeled steps. You assign whichever classification is most strongly represented in these k steps to your unlabeled step. After we could classify a single step, we wanted to get a sense of how somebody walks over time. By combining our methods for classifying a single step with our methods to convert a raw file into an array of steps, we could see the representation of each type of step in a walking session.
 
 
