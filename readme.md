@@ -3,7 +3,7 @@
 This is a data collection, analysis, and visualization software kit written by Sam Lobel and Yixing Du.
 
 ##Data Collection
-We don't want to put too much analytical load on our mBed, so data collection's main task is transmitting the raw input data from the mBed to the computer. On the mBed side of things, we collect data using sensors and then store it in a text file. 
+We don't want to put too much analytical load on our mBed, so data collection's main task is transmitting the raw input data from the mBed to the computer. Once transmitted, we need to store it in our DataCollection/Data folder with appropriate file names, so that we can access it in the Machine_Learning section. On the mBed side of things, we collect data using sensors and then store it in a text file. 
 
 #####Data Format
 There will be both labeled data, which is used for training, and unlabeled data, which is used to classify a person's walking style. The first line of labeled data is the type of walking that was used to generate the dataset (0 for normal, 1 for pronated, and 2 for supinated). The rest of the labeled file is a CSV, where each line is a list of the softPot values collected in one timeStep. An unlabeled datafile is only the CSV part of things.
@@ -27,6 +27,8 @@ Once we have our stepArray, we needed a metric for comparing two different steps
 
 #####Classifying Walking Style
 We settled on a pretty simple machine-learning algorithm called k-Nearest-Neighbor classification. You train this method by inputting all of your labeled steps. When you want to classify an unlabeled step, you compare it to all of the labelled steps, keeping track of its distance from each. Then, you look at the closest k labeled steps. You assign whichever classification is most strongly represented in these k steps to your unlabeled step. After we could classify a single step, we wanted to get a sense of how somebody walks over time. By combining our methods for classifying a single step with our methods to convert a raw file into an array of steps, we could see the representation of each type of step in a walking session.
+
+
 
 
 
