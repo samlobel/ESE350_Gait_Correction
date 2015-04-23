@@ -28,8 +28,12 @@ Once we have our stepArray, we needed a metric for comparing two different steps
 #####Classifying Walking Style
 We settled on a pretty simple machine-learning algorithm called k-Nearest-Neighbor classification. You train this method by inputting all of your labeled steps. When you want to classify an unlabeled step, you compare it to all of the labelled steps, keeping track of its distance from each. Then, you look at the closest k labeled steps. You assign whichever classification is most strongly represented in these k steps to your unlabeled step. After we could classify a single step, we wanted to get a sense of how somebody walks over time. By combining our methods for classifying a single step with our methods to convert a raw file into an array of steps, we could see the representation of each type of step in a walking session.
 
+##SYNTHESIS
 
+Here, I'll describe what the code does at the end of this project, in a perfect world.
+Theoretically, everything could be done in GUI. We could have a constant listening thread going that writes to our data thread, and have flags that tell the rest of the program what's going on. In the GUI file, we'd have a knnObject, that would automatically be kept up-to-date with training data. And we'd listen for new files being added to non-training Data. You could click on a file to watch it in the visualizer. As you watched, you'd see important values accumulate.
 
+That sounds pretty close to impossible. We'll probably have a listening mode, and then afterwards have a GUI that visualizes pre-collected data. We'll also have a script that just outputs relevant numbers.
 
 
 

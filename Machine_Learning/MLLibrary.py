@@ -1,33 +1,3 @@
-# import json
-
-
-
-# sampleLength = 4500
-# fsr = 1000
-# winsize = 3
-# windisp = 1.5
-
-# numWins = 1 + (sampleLength/fsr - winsize) / windisp
-
-# def numWindows(sl, fsr, ws, wd):
-#   return (1 + (sl/fsr - ws) / wd)
-
-
-# def numWinsFromDataList(data, fsr, ws, wd):
-#   return numWindows(len(data), fsr, ws,wd)
-
-
-
-
-# 
-
-
-
-
-
-
-
-
 """
 
 I think that I'm going to need dynamic time warping to match up steps. 
@@ -47,8 +17,18 @@ Tasks ahead
 -write methods to compare test data to training data
 -have ways to return sensible data
 
+
+
+INSTEAD, I think it may make more sense to: 
+-Break data into steps:
+-extract some set of numbers from each of the steps (like averages for each softpot: 
+-use an SVM to compare against it.
+
 """
 
+
+import serial
+from sklearn import svm
 
 # global numberContinuousToStart = 10
 # global missesAllowedForStart = 1
@@ -266,11 +246,229 @@ class kNNObject:
 
   def prettySimilarityString(self, step, k):
     breakdown = self.findSimilarityBreakdown(step, k)
-    return "Supination:   " + str(breakdown[2][1]) + "Normal:   " + str(breakdown[0][1]) +
+    return "Supination:   " + str(breakdown[2][1]) + "Normal:   " + str(breakdown[0][1]) +\
         "Pronation:   " + str(breakdown[0][1])
 
 
+
+
+
+
+def trainFromSerial(samples, fileName, category):
+  print "opening serial"
+  serdev = '/dev/cu.usbmodem1412'
+  ser = serial.Serial(serdev)
+  i = 0
+  dataFile = open(fileName, 'w')
+  dataFile.write(str(category))
+  print "listening"
+  while i < samples:
+    a = ser.readline()
+    print "read " + str(a)
+    dataFile.write(a)
+    i += 1
+
+  dataFile.close()
+  print "completed"
+
+
+# trainFromSerial(20, 'testFile.txt', 1)
+
+
+
+def readRealInfoFromSerial(samples, filName, category):
+  print "opening serial"
+  serdev = '/dev/cu.usbmodem1412'
+  ser = serial.Serial(serdev)
+
+
+
+
+
+t = timer.clock()
+# code here
+f = timer.clock()
+
+print t - f
+
+
+s = timer.clock()
+
+while timer.clock() - s < 1000:
+  a = ser.readline()
+
+
+def waitForHandshake():
+  serdev = '/dev/cu.usbmodem1412'
+  ser = serial.Serial(serdev)
+  while True:
+    a = ser.readline()
+    print "hand-shaker read " + str(a)
+    if a == "handshake":
+      print "Handshook!"
+      break
+
+"""
+This is pretty complicated, so we need to plan it out for a bit.
+
+We first need to handshake. Then, we 
+No that's stupid
+
+The one transmitting data transmits for 9.5 seconds straight, and then
+listens for 0.5 seconds. The other guy listens for 99 percent of his life,
+but when he transmits, he does it for 10 seconds. 
+
+The one difficult thing is that we really should continuing to read the data
+from the ADC if we want to analy
+
+
+"""
+
+
+def trainingFileToArrayOfArrays(fileName):
+  f = open(fileName, 'r')
+  walkingType = f.readline()
+  dataArray = []
+  for line in f:
+    sampleArray = line.rsplit(', ')
+    if len(sampleArray) != 5:
+      print "funky data: " + str(sampleArray)
+      continue
+    dataArray.append(sampleArray)
+  f.close()
+  return (walkingType, dataArray)
+
+
+def extractFeaturesFromStep(step):
+  # Assumes that all of the arrays here are of length 5
+  # for now, the only feature is an average... but we could do more
+  """
+  LIST OF FEATURES
+  -average for each potentiometer
+  -percentage of time it's off
+  --something like splitting the sample into first-half, last-half
+  """
+  stepLength  = len(step)
+  sumArray = [0 for i in range(5)]
+  for sample in step:
+    for j in range(5):
+      sumArray[j] += sample[j]
+  averageArray = [total / stepLength for total in sumArray]
+  return averageArray
+
+def stringFromFeature(feature):
+  featureString = ', '.join(feature)
+  return featureString
+
+def featuresArrayFromStepArray(stepArray):
+  featureArray = []
+  for step in stepArray:
+    feature = extractFeaturesFromStep(step)
+    featureArray.push(feature)
+  return featureArray
+
+
+def rawDataTrainingFileToFeatureFile(trainingFile, featureFile):
+  walkingType, dataArray = trainingFileToArrayOfArrays(trainingFile)
+  arrayOfSteps = breakContinuousDataIntoSteps(dataArray)
   
+  ff = open(featureFile, 'w')
+  ff.write(str(walkingType) + '\n')
+
+  for step in arrayOfSteps:
+    feature = extractFeaturesFromStep(step)
+    ff.write(', '.join(feature) + '\n')
+
+  ff.close()
+
+
+
+
+
+def train(trainingLabel, serdevString, whereToSave, listenTime):
+  f = open(whereToSave, 'w')
+  f.write(str(trainingLabel) + '\n')
+  print "starting read"
+  start = time()
+  i = 0
+  while time() - start < listenTime:
+    i += 1
+    if i % 100 == 0:
+      print str(i) + " lines written"
+    a = ser.readline()
+    array = [l for l in a]
+    vals = array[0:5]
+    intArray = [ord(l) - 1 for l in vals]
+    if len(intArray) != 5:
+      print "funky data: " + str(intArray)
+      continue
+
+    strArray = [str(l) for l in intArray]
+    csv_line = ', '.join(strArray) + '\n'
+    f.write(csv_line)
+  f.close()
+  print "completed"
+
+
+def fromListenToFeatureFile(trainingLabel, serdevString, featureFileName, listenTime):
+  raw_dir = "raw_" + featureFileName
+  train(trainingLabel, serdevString, raw_dir, listenTime)
+  rawDataTrainingFileToFeatureFile(raw_dir, featureFileName)
+  return featureFileName
+
+
+
+
+
+
+def createTrainingSetFromFeatureFile(arrayOfTrainingFiles):
+  categoryArray = []
+  featuresArray = []
+  for names in arrayOfTrainingFiles:
+    f = open(arrayOfTrainingFiles, 'r')
+    category = int(f.readline())
+    for line in f:
+      features = line.rsplit(', ')
+      featuresArray.append(features)
+      categoryArray.append(category)
+    f.close()
+  return categoryArray, featuresArray
+
+
+
+
+class smvObject:
+  def __init__(self):
+    self.svm = svm.SVC()
+
+  def trainFromFeatureFiles(self, arrayOfFeatureFiles):
+    categoryArray, featuresArray = createTrainingSetFromFeatureFile(arrayOfFeatureFiles)
+    self.svm.fit(featuresArray, categoryArray)
+
+  def classifyFeature(self, feature):
+    return self.svm.predict(feature)
+
+
+
+
+
+
+
+
+
+"""
+Our data assumptions: 
+val 1:
+val 2:
+val 3:
+val 4:
+val 5:
+
+"""
+
+"""
+Now, try and do some SVM stuff I guess.
+"""
 
 
 
@@ -284,18 +482,5 @@ class kNNObject:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-# NEXT UP, IMPLEMENT K-NEAREST-NEIGHBORS ALGORITHM.
 
 

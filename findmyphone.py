@@ -13,6 +13,6 @@ for bdaddr in nearby_devices:
 		target_address = bdaddr
 		break
 if target_address:
-	print "target_address is ",target_address
+	print "target_address is ", target_address
 else:
 	print "No dice"

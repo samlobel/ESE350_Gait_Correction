@@ -13,4 +13,3 @@ This guy is going to wait for a training file to be transmitted over bluetooth. 
 
 ###acceptDataFile
 Like acceptTrainingFile, except it won't be expecting a classification number as its first line.
-
