@@ -134,14 +134,16 @@ int transmit(){
 int receive(){
     t.reset();
     t.start();
+    led4 = 1;
     while(t.read_ms() < RECEIVE_TIME){
         rxLen = rf_receive(rxBuffer, 128);
-        if(rxLen > 0){ 
+        if(rxLen > 0){
+            led4 = 0; 
             state = rxBuffer[0];
             if(state == '0'){
-            led1 = 1;
-            led2 = 0;
-            led3 = 0;    
+                led1 = 1;
+                led2 = 0;
+                led3 = 0;    
             }
             if(state == '1'){
                 led1 = 0;
@@ -157,6 +159,7 @@ int receive(){
             break;
         }
     }
+    led4 = 0;
     return 1;
 }
 
@@ -167,14 +170,14 @@ int main() {
     state = '\0';
     ain_data[5] = '\0'; //so it knows its a string. NEVER WRITE OVER THIS.
     while(1){
-        led4 = 1;
-        wait(0.2);
-        led4 = 0;
+        // led4 = 1;
+        // wait(0.2);
+        // led4 = 0;
 
         transmit();
-        led4 = 1;
-        wait(0.2);
-        led4 = 0;
+        // led4 = 1;
+        // wait(0.2);
+        // led4 = 0;
 
         receive();
     }
