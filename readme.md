@@ -35,6 +35,8 @@ Theoretically, everything could be done in GUI. We could have a constant listeni
 
 That sounds pretty close to impossible. We'll probably have a listening mode, and then afterwards have a GUI that visualizes pre-collected data. We'll also have a script that just outputs relevant numbers.
 
+###You run the project from a main.py file hidden deep inside of the Machine_Learning file
+
 
 
 
