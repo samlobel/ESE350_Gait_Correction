@@ -139,30 +139,85 @@ def extractFeaturesFromStep(step):
   -average for each potentiometer
   -percentage of time it's off
   --something like splitting the sample into first-half, last-half
+
+
+  --Yixing's great idea: split it into only transitions
   """
-  stepLength  = len(step)
-  sumArray = [0 for i in range(5)]
-  for sample in step:
-    for j in range(5):
-      sumArray[j] += sample[j]
-  averageArray = [total / stepLength for total in sumArray]
-  cosineSumArray = [0.0 for i in range(5)]
-  for i in range(stepLength):
-    for j in range(5):
-      cosineSumArray[j] += step[i][j] * cos((2*pi * i) / stepLength)
-  cosineArray = [total / stepLength for total in cosineSumArray]
-  for i in range(stepLength):
-    for j in range(5):
-      sineSumArray[j] += step[i][j] * sin((2*pi * i) / stepLength)
-  sineArray = [total / stepLength for total in sineSumArray]
+
+
+  def split(num):
+    if num > 50:
+      return 1
+    else:
+      return 0
+
+
+  binaryArrayWithBadRow = [[split(num) for num in timeStamp] for timeStamp in step]
+  binaryArray = [array[0:3] + [array[4]] for array in binaryArrayWithBadRow]
+  # pprint(binaryArray)
+
+  def compare(arr1, arr2):
+    for i in range(len(arr1)):
+      if arr1[i] != arr2[i]:
+        return False
+    return True
+
+  compressedBinaryArray = []
+  mostRecent = binaryArray[0]
+  compressedBinaryArray.append(mostRecent)
+  for array in binaryArray[1:]:
+    if not compare(mostRecent, array):
+      mostRecent = array
+      compressedBinaryArray.append(mostRecent)
+
+  # pprint(compressedBinaryArray)
+
+  tally = [0 for i in range(16)]
+
+  for array in compressedBinaryArray:
+    index = sum([2**i * array[i] for i in range(len(array))])
+    tally[index] += 1
+
+  # pprint(tally)
+
+  return tally
 
 
 
-  featureArray = []
-  featureArray.extend(averageArray)
-  featureArray.extend(cosineArray)
-  featureArray.extend(sineArray)
-  return featureArray
+
+
+
+
+
+
+
+
+
+
+  # stepLength  = len(step)
+  # sumArray = [0 for i in range(5)]
+  # for sample in step:
+  #   for j in range(5):
+  #     sumArray[j] += sample[j]
+  # averageArray = [total / stepLength for total in sumArray]
+  # cosineSumArray = [0.0 for i in range(5)]
+  # for i in range(stepLength):
+  #   for j in range(5):
+  #     cosineSumArray[j] += step[i][j] * cos((2*pi * i) / stepLength)
+  # cosineArray = [int(total / stepLength) for total in cosineSumArray]
+  # sineSumArray = [0.0 for i in range(5)]
+  # for i in range(stepLength):
+  #   for j in range(5):
+  #     sineSumArray[j] += step[i][j] * sin((2*pi * i) / stepLength)
+  # sineArray = [int(total / stepLength) for total in sineSumArray]
+
+
+
+  # featureArray = []
+  # featureArray.extend(averageArray)
+  # featureArray.extend(cosineArray)
+  # featureArray.extend(sineArray)
+  # return featureArray
 
 
   # return averageArray
@@ -244,9 +299,9 @@ class svmObject:
     f = open(featureFile, 'r')
     for line in f:
       feature = line.strip().rsplit(', ')
-      if len(feature) != 5:
-        print "feature length not five: " + str(feature)
-        continue
+      # if len(feature) != 15:
+      #   print "feature length not five: " + str(feature)
+      #   continue
       category = self.classifyFeature(feature)
       classList.extend(category)
       self.results.extend(category)

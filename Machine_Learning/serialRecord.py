@@ -39,9 +39,8 @@ def train(trainingLabel, serdevString, whereToSave, listenTime):
   print "comlpeted"
 
 
-def recordLive(serdevString, whereToSave, listenTime):
+def recordLive(ser, whereToSave, listenTime):
   # only difference is really if it writes a number to the top.
-  ser = serial.Serial(serdevString)
   ser.flushOutput()
   f = open(whereToSave, 'w')
   print "starting read"
@@ -72,14 +71,19 @@ def recordLive(serdevString, whereToSave, listenTime):
     csv_line = ', '.join(strArray) + '\n'
     f.write(csv_line)
   f.close()
-  ser.close()
+  # ser.close()
   print "comlpeted"
 
 
-def writeState(serdevString, state):
-  ser = serial.Serial(serdevString)
+def writeState(ser, state):
   ser.write(str(state))
-  ser.close()
+  # ser.close()
+
+
+def writeStupid(serdevString):
+  # ser = serial.Serial(serdevString)
+  ser.write('0')
+  # ser.close();
 
 
 

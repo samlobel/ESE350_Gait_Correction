@@ -15,6 +15,12 @@ AnalogIn   ain3(A3);
 AnalogIn   ain4(A4);
 
 
+DigitalOut led1(LED1);
+DigitalOut led2(LED2);
+DigitalOut led3(LED3);
+
+
+
 Serial pc(USBTX, USBRX);
 Timer t;
 
@@ -25,6 +31,9 @@ char rxBuffer[128];
 int rxLen;
 
 
+char state;
+
+
 int success;
 
 int received_state;
@@ -32,7 +41,7 @@ int received_state;
 
 
 float temp_data;
-char *ain_data = char[6];
+char ain_data[6];
 
 
 
@@ -42,8 +51,8 @@ void ainToBuffer(char *dataBuffer){
     dataBuffer[0] = int (ain0.read() * 100) + 1;
     dataBuffer[1]  = int (ain1.read() * 100) + 1;
     dataBuffer[2] = int (ain2.read() * 100) + 1;
-    dataBuffer[3]  int (ain3.read() * 100) + 1;
-    dataBuffer[4] int (ain4.read() * 100) + 1;
+    dataBuffer[3] = int (ain3.read() * 100) + 1;
+    dataBuffer[4] = int (ain4.read() * 100) + 1;
 }
 
 
@@ -114,9 +123,10 @@ int transmit(){
     while(t.read_ms() < TRANSMIT_TIME){
         ainToBuffer(ain_data); //puts data into buffer
         strcpy(txBuffer, ain_data);
-        rf_send(txBuffer, strlen(txBuffer) + 1)
+        rf_send(txBuffer, strlen(txBuffer) + 1);
         // success = printPressureData();
     }
+    return 1;
 }
 
 
@@ -125,21 +135,38 @@ int receive(){
     t.start();
     while(t.read_ms() < RECEIVE_TIME){
         rxLen = rf_receive(rxBuffer, 128);
-        if(rxLen > 0){
+        if(rxLen > 0){ 
+            state = rxBuffer[0];
+            if(state == '0'){
+            led1 = 1;
+            led2 = 0;
+            led3 = 0;    
+            }
+            if(state == '1'){
+                led1 = 0;
+                led2 = 1;
+                led3 = 0;    
+            }
+            if(state == '2'){
+                led1 = 0;
+                led2 = 0;
+                led3 = 1;    
+            }
             pc.printf("%s\n", rxBuffer);
         }
     }
+    return 1;
 }
 
 
 
 int main() {
     // setup
-    ain[5] = '\0'; //so it knows its a string. NEVER WRITE OVER THIS.
+    state = '\0';
+    ain_data[5] = '\0'; //so it knows its a string. NEVER WRITE OVER THIS.
     while(1){
         transmit();
         receive();
     }
     
 }
-

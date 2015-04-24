@@ -3,13 +3,20 @@
 #include <string>
 
 //in milliseconds
-#define TRANSMIT_TIME 10000
-#define RECEIVE_TIME 100000 
+#define TRANSMIT_TIME 1000
+#define RECEIVE_TIME 10000 
 
 
 
 Serial pc(USBTX, USBRX);
 Timer t;
+
+DigitalOut led1(LED1);
+DigitalOut led2(LED2);
+DigitalOut led3(LED3);
+DigitalOut led4(LED4);
+
+ 
 
 
 MRF24J40 mrf(p11, p12, p13, p14, p21);
@@ -104,8 +111,11 @@ int printPressureData(){
 
 
 int transmit(){
-
+    wait(0.1);
+    led4 = 0;
     if(pc.readable()){
+        led4 = 1;
+
         //get most recent
         while(pc.readable()){
             tester = pc.getc();
@@ -115,8 +125,34 @@ int transmit(){
         }
         txBuffer[0] = mostRecent;
         txBuffer[1] = '\0'; //that ends the string, only sends that little bit.
+        if(mostRecent == '\0'){
+            led1 = 1;
+            led2 = 1;
+            led3 = 1;    
+        }
+        if(mostRecent == '\n'){
+            led1 = 1;
+            led2 = 0;
+            led3 = 1;    
+        }
+        if(mostRecent == '0'){
+            led1 = 1;
+            led2 = 0;
+            led3 = 0;    
+        }
+        if(mostRecent == '1'){
+            led1 = 0;
+            led2 = 1;
+            led3 = 0;    
+        }
+        if(mostRecent == '2'){
+            led1 = 0;
+            led2 = 0;
+            led3 = 1;    
+        }
         t.reset();
         t.start();
+        
         while(t.read_ms() < TRANSMIT_TIME){
             //////////
             rf_send(txBuffer, 128);
@@ -133,17 +169,44 @@ int receive(){
     while(t.read_ms() < RECEIVE_TIME){
         printPressureData();
     }
+    return 1;
+}
+
+
+int stupid(){
+    
+    // while(!pc.readable()){
+    //     pc.printf("hello\n\r"); 
+    // }
+    while(pc.readable()){
+        pc.putc(pc.getc());
+    }
+    // pc.printf("hello\n");
+    // while(pc.readable()){
+    //     pc.putc(pc.getc());
+    //     pc.putc('\n');
+    // }
+    return 0;
 }
 
 
 
 int main() {
     // setup
+    
+
     mostRecent = '0';
+    led1 = 0;
+    led2 = 0;
+    led3 = 0;
+
+    // while(1){
+    //     stupid();
+    // }
 
     while(1){
         receive();
+        transmit();
     }
     
 }
-
