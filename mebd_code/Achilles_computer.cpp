@@ -16,6 +16,9 @@ MRF24J40 mrf(p11, p12, p13, p14, p21);
 char txBuffer[128];
 char rxBuffer[128];
 int rxLen;
+char mostRecent;
+char tester;
+
 
 
 // int success;
@@ -100,6 +103,30 @@ int printPressureData(){
 // }
 
 
+int transmit(){
+
+    if(pc.readable()){
+        //get most recent
+        while(pc.readable()){
+            tester = pc.getc();
+            if(tester != '\0'){
+                mostRecent = tester; //so end of line character isn't included
+            }
+        }
+        txBuffer[0] = mostRecent;
+        txBuffer[1] = '\0'; //that ends the string, only sends that little bit.
+        t.reset();
+        t.start();
+        while(t.read_ms() < TRANSMIT_TIME){
+            //////////
+            rf_send(txBuffer, 128);
+        }
+
+    }
+    return 0;
+}
+
+
 int receive(){
     t.reset();
     t.start();
@@ -112,6 +139,8 @@ int receive(){
 
 int main() {
     // setup
+    mostRecent = '0';
+
     while(1){
         receive();
     }

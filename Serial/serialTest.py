@@ -1,8 +1,7 @@
 import serial
 from time import time
 
-serdev = '/dev/cu.usbmodem1412'
-ser = serial.Serial(serdev)
+# serdev = '/dev/cu.usbmodem1412'
 # print "writing next"
 
 # ser.write("Hi Sam\n")
@@ -41,6 +40,7 @@ to subtract one from it when we convert it back
 """
 
 def train(trainingLabel, serdevString, whereToSave, listenTime):
+  ser = serial.Serial(serdevString)
   ser.flushOutput()
   f = open(whereToSave, 'w')
   f.write(str(trainingLabel) + '\n')
@@ -49,6 +49,8 @@ def train(trainingLabel, serdevString, whereToSave, listenTime):
   
   for k in range(200):
     a = ser.readline()
+    # really just a hack, because there's some sort of lag between the last run
+    # and this one, every time.
   
 
   i = 0
@@ -64,13 +66,14 @@ def train(trainingLabel, serdevString, whereToSave, listenTime):
     vals = array[0:5]
     intArray = [ord(l) - 1 for l in vals]
     if len(intArray) != 5:
-      print "funky data: " + str(intArray)
+      # print "funky data: " + str(intArray)
       continue
 
     strArray = [str(l) for l in intArray]
     csv_line = ', '.join(strArray) + '\n'
     f.write(csv_line)
   f.close()
+  ser.close()
   print "comlpeted"
 
 
@@ -95,4 +98,4 @@ train(1, '/dev/cu.usbmodem1412', 'trainingDataOne.txt', 10)
 # a = ser.readline()
 # print a
 
-ser.close()
+# ser.close()
