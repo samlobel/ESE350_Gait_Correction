@@ -3,8 +3,8 @@
 #include <string>
 
 //in milliseconds
-#define TRANSMIT_TIME 1000
-#define RECEIVE_TIME 10000 
+#define TRANSMIT_TIME 5000
+#define RECEIVE_TIME 30000 
 
 
 
@@ -111,10 +111,11 @@ int printPressureData(){
 
 
 int transmit(){
-    wait(0.1);
-    led4 = 0;
+    // led4 = 1;
+    // wait(0.2);
+    // led4 = 0;
     if(pc.readable()){
-        led4 = 1;
+        // led4 = 1;
 
         //get most recent
         while(pc.readable()){
@@ -125,6 +126,7 @@ int transmit(){
         }
         txBuffer[0] = mostRecent;
         txBuffer[1] = '\0'; //that ends the string, only sends that little bit.
+        // pc.putc(mostRecent);
         if(mostRecent == '\0'){
             led1 = 1;
             led2 = 1;
@@ -178,14 +180,61 @@ int stupid(){
     // while(!pc.readable()){
     //     pc.printf("hello\n\r"); 
     // }
-    while(pc.readable()){
-        pc.putc(pc.getc());
-    }
+    led4 = 1;
+    wait(0.2);
+    led4 = 0;
+    if(pc.readable()){
+        led4 = 1;
+
+        //get most recent
+        while(pc.readable()){
+            tester = pc.getc();
+            pc.putc(tester);
+            pc.putc('\n');
+            if(tester != '\0'){
+                mostRecent = tester; //so end of line character isn't included
+            }
+        }
+        txBuffer[0] = mostRecent;
+        txBuffer[1] = '\0'; //that ends the string, only sends that little bit.
+        // pc.putc(mostRecent);
+        if(mostRecent == '\0'){
+            led1 = 1;
+            led2 = 1;
+            led3 = 1;    
+        }
+        else if(mostRecent == '\n'){
+            led1 = 1;
+            led2 = 0;
+            led3 = 1;    
+        }
+        else if(mostRecent == '0'){
+            led1 = 1;
+            led2 = 0;
+            led3 = 0;    
+        }
+        else if(mostRecent == '1'){
+            led1 = 0;
+            led2 = 1;
+            led3 = 0;    
+        }
+        else if(mostRecent == '2'){
+            led1 = 0;
+            led2 = 0;
+            led3 = 1;    
+        }
+        else{
+            led1 = 1;
+            led2 = 1;
+            led3 = 1;  
+            led4 = 0;  
+        }
     // pc.printf("hello\n");
     // while(pc.readable()){
     //     pc.putc(pc.getc());
     //     pc.putc('\n');
     // }
+    }
     return 0;
 }
 
@@ -202,10 +251,18 @@ int main() {
 
     // while(1){
     //     stupid();
+    //     wait(3);
     // }
 
     while(1){
+    //     led4 = 1;
+    //     wait(0.2);
+    //     led4 = 0;
         receive();
+    //     led4 = 1;
+    //     wait(0.2);
+    //     led4 = 0;
+
         transmit();
     }
     

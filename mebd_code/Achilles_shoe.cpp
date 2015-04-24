@@ -3,7 +3,7 @@
 #include <string>
 
 //in milliseconds
-#define TRANSMIT_TIME 9500
+#define TRANSMIT_TIME 4500
 #define RECEIVE_TIME 500 
 
 
@@ -18,6 +18,7 @@ AnalogIn   ain4(A4);
 DigitalOut led1(LED1);
 DigitalOut led2(LED2);
 DigitalOut led3(LED3);
+DigitalOut led4(LED4);
 
 
 
@@ -165,7 +166,15 @@ int main() {
     state = '\0';
     ain_data[5] = '\0'; //so it knows its a string. NEVER WRITE OVER THIS.
     while(1){
+        led4 = 1;
+        wait(0.2);
+        led4 = 0;
+
         transmit();
+        led4 = 1;
+        wait(0.2);
+        led4 = 0;
+
         receive();
     }
     

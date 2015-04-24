@@ -55,11 +55,22 @@ def main():
     classes = classifier.classifyFeatureFile(featureFileName)
     classesCounted = Counter(classes)
     print classesCounted
-    mostCommon = classesCounted.most_common(1)[0]
-    print "Most common: " + str(mostCommon)
-    serialRecord.writeState(ser, mostCommon)
+
+    maybeMostCommon = classesCounted.most_common(1)
+    if len(maybeMostCommon) != 0:
+      mostCommon = maybeMostCommon[0][0]
+      print "Most common: " + str(mostCommon)
+      # serialRecord.writeState(ser, mostCommon)
+      while not ser.writable():
+        pass
+      ser.write(str(mostCommon))
+    else:
+      print "It looks like there were no steps..."
     # I don't really know how to test if this got through.
     i += 1
+
+
+
 
 
 
@@ -82,13 +93,16 @@ main()
 
 
 # ser = serial.Serial('/dev/cu.usbmodem1412')
+# i = 0
 # while True:
+
 #   # serialRecord.writeStupid('/dev/cu.usbmodem1412')
 #   while not ser.writable():
 #     pass
-#   print ser.write('50')
-
-#   time.sleep(0.1)
+#   print ser.write(str(i))
+#   i += 1
+#   i = i % 3
+#   time.sleep(15)
 
 
 

@@ -48,6 +48,7 @@ def recordLive(ser, whereToSave, listenTime):
   
   for k in range(200):
     a = ser.readline()
+    # print a
     # really just a hack, because there's some sort of lag between the last run
     # and this one, every time.
   
