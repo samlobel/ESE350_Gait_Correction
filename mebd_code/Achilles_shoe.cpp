@@ -154,6 +154,7 @@ int receive(){
                 led3 = 1;    
             }
             pc.printf("%s\n", rxBuffer);
+            break;
         }
     }
     return 1;
