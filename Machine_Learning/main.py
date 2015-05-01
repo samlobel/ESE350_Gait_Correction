@@ -62,8 +62,14 @@ def main():
       print "Most common: " + str(mostCommon)
       # serialRecord.writeState(ser, mostCommon)
       while not ser.writable():
+        print "not writable"
         pass
-      ser.write(str(mostCommon))
+      t = time.time()
+      print "time loop soon."
+      while time.time() - t < 10:
+        time.sleep(0.1)
+        # print time.time()
+        ser.write(str(mostCommon))
     else:
       print "It looks like there were no steps..."
     # I don't really know how to test if this got through.
@@ -88,10 +94,6 @@ def main():
 # b is mid left to front right. Starts high at back.
 # d is mid left to front right. Starts low at back.
 
-
-main()
-
-
 # ser = serial.Serial('/dev/cu.usbmodem1412')
 # i = 0
 # while True:
@@ -111,15 +113,25 @@ main()
 
 
 
+main()
+
+
+
+
+
+
+
+
+
 # # train(0, 'data/training/pronatingtrain_1.txt', 60)
 # MLLibrary.rawDataFileToFeatureFile('data/training/pronatingtrain_1.txt', './data/training/pronateFeature_1.txt', True)
 # print "pronate trained"
 
-# # train(1, 'data/training/supinatingtrain_1.txt', 60)
+# train(1, 'data/training/supinatingtrain_1.txt', 60)
 # MLLibrary.rawDataFileToFeatureFile('./data/training/supinatingtrain_1.txt', './data/training/supinateFeature_1.txt', True)
 # print "supinate trained"
 
-# # train(2, './data/training/normaltrain_1.txt', 60)
+# train(2, './data/training/normaltrain_1.txt', 60)
 # MLLibrary.rawDataFileToFeatureFile('./data/training/normaltrain_1.txt', './data/training/normalFeature_1.txt', True)
 # print "normal trained"
 

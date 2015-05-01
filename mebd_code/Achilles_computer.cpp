@@ -88,6 +88,9 @@ int printPressureData(){
     if (rxLen > 0){
         pc.printf("%s\n", rxBuffer); //prints the line
         return 1; //symbol of success
+        led4 = 1;
+        wait(0.1);
+        led4 = 0;
     }
     else{
         return 0;
@@ -132,24 +135,29 @@ int transmit(){
             led2 = 1;
             led3 = 1;    
         }
-        if(mostRecent == '\n'){
+        else if(mostRecent == '\n'){
             led1 = 1;
             led2 = 0;
             led3 = 1;    
         }
-        if(mostRecent == '0'){
+        else if(mostRecent == '0'){
             led1 = 1;
             led2 = 0;
             led3 = 0;    
         }
-        if(mostRecent == '1'){
+        else if(mostRecent == '1'){
             led1 = 0;
             led2 = 1;
             led3 = 0;    
         }
-        if(mostRecent == '2'){
+        else if(mostRecent == '2'){
             led1 = 0;
             led2 = 0;
+            led3 = 1;    
+        }
+        else{
+            led1 = 0;
+            led2 = 1;
             led3 = 1;    
         }
         t.reset();
@@ -157,7 +165,10 @@ int transmit(){
         
         while(t.read_ms() < TRANSMIT_TIME){
             //////////
-            rf_send(txBuffer, 128);
+            led4 = 1;
+            wait(0.3);
+            led4 = 0;
+            rf_send(txBuffer, 2);
         }
 
     }

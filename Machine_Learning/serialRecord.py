@@ -12,6 +12,7 @@ def train(trainingLabel, serdevString, whereToSave, listenTime):
   
   for k in range(200):
     a = ser.readline()
+    # print a
     # really just a hack, because there's some sort of lag between the last run
     # and this one, every time.
   
@@ -20,7 +21,7 @@ def train(trainingLabel, serdevString, whereToSave, listenTime):
 
   while time() - start < listenTime:
     i += 1
-    if i % 100 == 0:
+    if i % 500 == 0:
       print str(i) + " lines written"
     a = ser.readline()
     # print a
@@ -61,11 +62,12 @@ def recordLive(ser, whereToSave, listenTime):
       print str(i) + " lines written"
     a = ser.readline()
     # print a
+    # print a
     array = [l for l in a]
     vals = array[0:5]
     intArray = [ord(l) - 1 for l in vals]
     if len(intArray) != 5:
-      # print "funky data: " + str(intArray)
+      print "funky data: " + str(intArray)
       continue
 
     strArray = [str(l) for l in intArray]

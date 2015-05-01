@@ -65,7 +65,7 @@ def rawFileToArrayOfArrays(fileName, isTraining):
     strArray = line.strip().rsplit(', ')
     sampleArray = [int(string) for string in strArray]
     if len(sampleArray) != 5:
-      # print "funky data: " + str(sampleArray)
+      print "funky data: " + str(sampleArray)
       continue
     dataArray.append(sampleArray)
   f.close()
@@ -146,14 +146,14 @@ def extractFeaturesFromStep(step):
 
 
   def split(num):
-    if num > 50:
+    if num > 66:
       return 1
     else:
       return 0
 
 
   binaryArrayWithBadRow = [[split(num) for num in timeStamp] for timeStamp in step]
-  binaryArray = [array[0:3] + [array[4]] for array in binaryArrayWithBadRow]
+  binaryArray = [[array[0]] + [array[2]] + [array[3]] + [array[4]] for array in binaryArrayWithBadRow]
   # pprint(binaryArray)
 
   def compare(arr1, arr2):
@@ -236,6 +236,10 @@ def rawDataFileToFeatureFile(trainingFile, featureFile, isTraining):
   walkingType, dataArray = rawFileToArrayOfArrays(trainingFile, isTraining)
   arrayOfSteps = breakContinuousDataIntoSteps(dataArray)
   
+  # print "\n\n\n\n\ndataArray\n\n\n\n\n"
+  # pprint(dataArray)
+  # print "\n\n\n\n\narrayOfSteps\n\n\n\n\n"
+  # pprint(arrayOfSteps)
   ff = open(featureFile, 'w')
   if isTraining:
     ff.write(str(walkingType) + '\n')

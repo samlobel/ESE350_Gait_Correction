@@ -20,6 +20,11 @@ DigitalOut led2(LED2);
 DigitalOut led3(LED3);
 DigitalOut led4(LED4);
 
+DigitalOut pinOne(p7);
+DigitalOut pinTwo(p8);
+DigitalOut enable(p6);
+
+
 
 
 Serial pc(USBTX, USBRX);
@@ -44,6 +49,51 @@ int received_state;
 float temp_data;
 char ain_data[6];
 
+
+
+void makeUpFootDown(char *dataBuffer){
+    dataBuffer[0] = 71;
+    dataBuffer[1]  = 72;
+    dataBuffer[2] = 4;
+    dataBuffer[3] = 73;
+    dataBuffer[4] = 75;
+}
+
+void makeUpFootUp(char *dataBuffer){
+    dataBuffer[0] = 4;
+    dataBuffer[1]  = 3;
+    dataBuffer[2] = 6;
+    dataBuffer[3] = 8;
+    dataBuffer[4] = 9;
+}
+
+
+void makeUpFootDownTwo(char *dataBuffer){
+    dataBuffer[0] = 2;
+    dataBuffer[1]  = 80;
+    dataBuffer[2] = 4;
+    dataBuffer[3] = 81;
+    dataBuffer[4] = 79;
+}
+
+
+void makeUpReading(char *dataBuffer, int i){
+    if (i % 100 < 20){
+        makeUpFootDown(dataBuffer);
+    }
+    else if(i % 100 < 40){
+        makeUpFootDownTwo(dataBuffer);
+    }
+    else if (i % 100 < 60){
+        makeUpFootDown(dataBuffer);
+    }
+    else if(i % 100 < 80){
+        makeUpFootDownTwo(dataBuffer);
+    }
+    else{
+        makeUpFootUp(dataBuffer);
+    }
+}
 
 
 void ainToBuffer(char *dataBuffer){
@@ -121,13 +171,38 @@ void rf_send(char *data, uint8_t len)
 int transmit(){
     t.reset();
     t.start();
+    int i = 0;
     while(t.read_ms() < TRANSMIT_TIME){
+        wait(0.005);
         ainToBuffer(ain_data); //puts data into buffer
+
+        // makeUpReading(ain_data, i);
+        i++;
         strcpy(txBuffer, ain_data);
         rf_send(txBuffer, strlen(txBuffer) + 1);
         // success = printPressureData();
     }
     return 1;
+}
+
+
+void hBridgeCW(){
+    pinOne = 1;
+    pinTwo = 0;
+    wait(1);
+
+}
+
+void hBridgeCCW(){
+    pinOne = 1;
+    pinTwo = 0;
+    wait(1);
+
+}
+
+void hBridgeStop(){
+    pinOne = 0;
+    pinTwo = 0;
 }
 
 
@@ -137,29 +212,38 @@ int receive(){
     led4 = 1;
     while(t.read_ms() < RECEIVE_TIME){
         rxLen = rf_receive(rxBuffer, 128);
+        wait(0.3);
         if(rxLen > 0){
             led4 = 0; 
             state = rxBuffer[0];
             if(state == '0'){
                 led1 = 1;
                 led2 = 0;
-                led3 = 0;    
+                led3 = 0;   
+                hBridgeCW(); 
             }
-            if(state == '1'){
+            else if(state == '1'){
                 led1 = 0;
                 led2 = 1;
-                led3 = 0;    
+                led3 = 0;
+                hBridgeCCW();  
             }
-            if(state == '2'){
+            else if(state == '2'){
+                hBridgeStop();
                 led1 = 0;
                 led2 = 0;
                 led3 = 1;    
+            } else{
+                led1 = 1;
+                led2 = 1;
+                led3 = 1;    
             }
-            pc.printf("%s\n", rxBuffer);
+            // pc.printf("%s\n", rxBuffer);
             break;
         }
     }
     led4 = 0;
+    hBridgeStop();
     return 1;
 }
 
@@ -169,6 +253,7 @@ int main() {
     // setup
     state = '\0';
     ain_data[5] = '\0'; //so it knows its a string. NEVER WRITE OVER THIS.
+    hBridgeStop();
     while(1){
         // led4 = 1;
         // wait(0.2);
