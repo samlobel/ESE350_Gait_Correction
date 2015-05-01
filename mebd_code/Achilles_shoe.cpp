@@ -189,14 +189,14 @@ int transmit(){
 void hBridgeCW(){
     pinOne = 1;
     pinTwo = 0;
-    wait(1);
+    wait(2);
 
 }
 
 void hBridgeCCW(){
     pinOne = 1;
     pinTwo = 0;
-    wait(1);
+    wait(2);
 
 }
 

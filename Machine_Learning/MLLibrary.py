@@ -9,7 +9,7 @@ def footIsDown(oneTimeData):
   activated = 0;
   # print oneTimeData
   for value in oneTimeData:
-    if value > 15:
+    if value > 25:
       activated += 1
   # print activated >= 2
   return activated >= 2
